@@ -1,0 +1,7 @@
+.git
+*.md
+deploy.sh
+.env
+.env.*
+service-contracts/node_modules
+service-contracts/dist

@@ -1658,7 +1658,7 @@ export default function App() {
 
   // Auto-refresh activity log when switching to the Activity tab
   useEffect(() => {
-    if (view === "activity" && session) loadActivityLog();
+    if (view === "activity" && user) loadActivityLog();
   }, [view]);
 
   const [search, setSearch] = useState("");

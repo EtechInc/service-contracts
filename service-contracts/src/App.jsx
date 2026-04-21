@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from './supabaseClient'
-import LoginPage from './LoginPage'
+import { useSession, SignInButton } from '@etechinc/sso-client'
 
 // DB mapping helpers
 function mapDbToContract(c) {
@@ -1389,25 +1389,8 @@ function autoAllocateHours(extensionDate, contractedHours) {
 }
 
 export default function App() {
-  // Auth state
-  const [session, setSession] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const { user, loading: authLoading, logout } = useSession();
   const [dataLoading, setDataLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setAuthLoading(false);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-  };
 
   const [division, setDivision] = useState("KNA");
 
@@ -1430,9 +1413,9 @@ export default function App() {
   // Customer history: { [customerNo]: { 2017: { hrs, rev }, 2018: ... } }
   const [customerHistory, setCustomerHistory] = useState({});
 
-  // Load all data from Supabase when session is available
+  // Load all data from Supabase when user is authenticated
   useEffect(() => {
-    if (!session) return;
+    if (!user) return;
 
     async function loadAllData() {
       setDataLoading(true);
@@ -1576,7 +1559,7 @@ export default function App() {
     }
 
     loadAllData();
-  }, [session]);
+  }, [user]);
 
   // Active division data (derived)
   const workOrders = division === "KNA" ? knaWorkOrders : kcanWorkOrders;
@@ -1754,7 +1737,7 @@ export default function App() {
         action_type: actionType,
         contract_id: contractId || null,
         contract_name: contractName || null,
-        user_email: session?.user?.email || null,
+        user_email: user?.email || null,
         details: details || {},
       });
     } catch (e) { console.error('Failed to log activity:', e); }
@@ -2266,13 +2249,13 @@ export default function App() {
 
   // Auto-capture current month snapshot if not yet stored
   useEffect(() => {
-    if (dataLoading || !session) return;
+    if (dataLoading || !user) return;
     const now = new Date();
     const key = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
     if (key.startsWith("2026") && !monthlySnapshots[key]) {
       saveSnapshot(key, compute2026Total());
     }
-  }, [dataLoading, session, division]);
+  }, [dataLoading, user, division]);
 
 
   function startEdit(c) {
@@ -2297,8 +2280,16 @@ export default function App() {
     );
   }
 
-  if (!session) {
-    return <LoginPage />;
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', fontFamily: "'Barlow Condensed', sans-serif" }}>
+        <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, padding: '40px 48px', width: 380, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', textAlign: 'center' }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#f8fafc', letterSpacing: '0.1em' }}>KANNEGIESSER</div>
+          <div style={{ fontSize: 13, color: '#64748b', marginTop: 4, letterSpacing: '0.08em', marginBottom: 32 }}>SERVICE CONTRACTS</div>
+          <SignInButton />
+        </div>
+      </div>
+    );
   }
 
   if (dataLoading) {
@@ -2391,7 +2382,7 @@ export default function App() {
                   </button>
                 ))}
               </div>
-              <button onClick={handleSignOut} style={{ fontSize: 11, padding: '5px 12px', background: 'none', border: '1px solid #cbd5e1', borderRadius: 4, color: '#64748b', cursor: 'pointer', letterSpacing: '0.06em' }}>Sign Out</button>
+              <button onClick={logout} style={{ fontSize: 11, padding: '5px 12px', background: 'none', border: '1px solid #cbd5e1', borderRadius: 4, color: '#64748b', cursor: 'pointer', letterSpacing: '0.06em' }}>Sign Out</button>
             </div>
             <div className="mono" style={{ fontSize: 10, color: "#2563eb", letterSpacing: "0.2em", marginTop: 2 }}>
               {division === "KCAN" ? "If it's measured, it's managed, eh." : "If it's measured, it's managed."}

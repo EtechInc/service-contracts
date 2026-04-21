@@ -1,8 +1,13 @@
 FROM node:20-alpine AS build
 WORKDIR /app
-COPY service-contracts/package.json service-contracts/package-lock.json ./
+
+ARG GITHUB_PACKAGES_TOKEN
+ENV GITHUB_PACKAGES_TOKEN=$GITHUB_PACKAGES_TOKEN
+
+COPY service-contracts/package.json service-contracts/package-lock.json service-contracts/.npmrc ./
 RUN npm ci
 COPY service-contracts/ .
+
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 ARG VITE_PUBLIC_AZURE_CLIENT_ID

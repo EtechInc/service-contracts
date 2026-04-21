@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { supabase } from './supabaseClient'
-import { useSession, SignInButton } from '@etechinc/sso-client'
+import { supabase, setBrokerToken } from './supabaseClient'
+import { useSession, SignInButton, getSupabaseToken } from '@etechinc/sso-client'
 
 // DB mapping helpers
 function mapDbToContract(c) {
@@ -1390,7 +1390,25 @@ function autoAllocateHours(extensionDate, contractedHours) {
 
 export default function App() {
   const { user, loading: authLoading, logout } = useSession();
+  const [tokenReady, setTokenReady] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
+
+  // Keep broker token fresh — gates data loading so queries never fire with anon key
+  useEffect(() => {
+    if (!user) { setBrokerToken(null); setTokenReady(false); return; }
+    let timer;
+    let cancelled = false;
+    const refresh = async () => {
+      const result = await getSupabaseToken('https://kannegiesser.ai', 'service-contracts');
+      if (cancelled || !result) return;
+      setBrokerToken(result.access_token);
+      setTokenReady(true);
+      const msUntilRefresh = Math.max(0, (result.expires_at * 1000 - Date.now()) - 5 * 60 * 1000);
+      timer = window.setTimeout(refresh, msUntilRefresh);
+    };
+    refresh();
+    return () => { cancelled = true; if (timer) clearTimeout(timer); };
+  }, [user]);
 
   const [division, setDivision] = useState("KNA");
 
@@ -1413,9 +1431,9 @@ export default function App() {
   // Customer history: { [customerNo]: { 2017: { hrs, rev }, 2018: ... } }
   const [customerHistory, setCustomerHistory] = useState({});
 
-  // Load all data from Supabase when user is authenticated
+  // Load all data from Supabase — wait for broker token before firing any queries
   useEffect(() => {
-    if (!user) return;
+    if (!user || !tokenReady) return;
 
     async function loadAllData() {
       setDataLoading(true);
@@ -1559,7 +1577,7 @@ export default function App() {
     }
 
     loadAllData();
-  }, [user]);
+  }, [user, tokenReady]);
 
   // Active division data (derived)
   const workOrders = division === "KNA" ? knaWorkOrders : kcanWorkOrders;
@@ -2249,13 +2267,13 @@ export default function App() {
 
   // Auto-capture current month snapshot if not yet stored
   useEffect(() => {
-    if (dataLoading || !user) return;
+    if (dataLoading || !user || !tokenReady) return;
     const now = new Date();
     const key = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
     if (key.startsWith("2026") && !monthlySnapshots[key]) {
       saveSnapshot(key, compute2026Total());
     }
-  }, [dataLoading, user, division]);
+  }, [dataLoading, user, tokenReady, division]);
 
 
   function startEdit(c) {

@@ -9,6 +9,7 @@ function mapDbToContract(c) {
     division: c.division,
     customer: c.customer,
     customerNo: c.customer_no || '',
+    customerPO: c.customer_po || '',
     contractNo: c.contract_no || '',
     billingNo: c.billing_no || '',
     shippingNo: c.shipping_no || '',
@@ -44,6 +45,7 @@ function mapContractToDb(c) {
   return {
     customer: c.customer,
     customer_no: c.customerNo || '',
+    customer_po: c.customerPO || '',
     contract_no: c.contractNo || '',
     billing_no: c.billingNo || '',
     shipping_no: c.shippingNo || '',
@@ -220,7 +222,7 @@ const CORPORATE_GROUPS = [
 ];
 
 const emptyContract = {
-  customer: "", customerNo: "", contractNo: "", billingNo: "", shippingNo: "", team: "", travelCosts: "Billable",
+  customer: "", customerNo: "", customerPO: "", contractNo: "", billingNo: "", shippingNo: "", team: "", travelCosts: "Billable",
   corporateGroup: "None",
   monthlyRevenue: 0, contractedHours: 0, hourlyRate: 0, contractAmount: 0,
   hours2024: 0, hours2025: 0, hours2026: 0, hours2027: 0, hours2028: 0,
@@ -834,6 +836,10 @@ function VisitPanel({ contract: c, visits, newVisit, setNewVisit, onAddVisit, on
                   <input value={contractForm.contractNo || ""} onChange={e => setContractForm(f => ({ ...f, contractNo: e.target.value }))} style={{ width: "100%" }} />
                 </div>
                 <div className="form-field">
+                  <label>Customer PO</label>
+                  <input value={contractForm.customerPO || ""} onChange={e => setContractForm(f => ({ ...f, customerPO: e.target.value }))} style={{ width: "100%" }} />
+                </div>
+                <div className="form-field">
                   <label>Corporate Group</label>
                   <select value={contractForm.corporateGroup || "None"} onChange={e => onGroupSelect(e.target.value, v => setContractForm(f => ({ ...f, corporateGroup: v })))} style={{ width: "100%" }}>
                     {allCorporateGroups.map(g => <option key={g}>{g}</option>)}
@@ -904,6 +910,15 @@ function VisitPanel({ contract: c, visits, newVisit, setNewVisit, onAddVisit, on
                 <div className="form-field" style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 18 }}>
                   <input type="checkbox" id="autoRenewPanel" checked={!!contractForm.autoRenew} onChange={e => setContractForm(f => ({ ...f, autoRenew: e.target.checked }))} style={{ width: "auto" }} />
                   <label htmlFor="autoRenewPanel" style={{ fontSize: 11, color: "#1a2235", textTransform: "none", letterSpacing: 0, cursor: "pointer", marginBottom: 0 }}>Auto Renew</label>
+                </div>
+                <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                  <label>Notes</label>
+                  <textarea
+                    value={contractForm.notes || ""}
+                    onChange={e => setContractForm(f => ({ ...f, notes: e.target.value }))}
+                    placeholder="Add any notes about this contract..."
+                    style={{ width: "100%", minHeight: 80, resize: "vertical", fontFamily: "inherit", fontSize: 11, padding: 8, border: "1px solid #cbd5e1", borderRadius: 4, boxSizing: "border-box" }}
+                  />
                 </div>
               </div>
               {/* Live calc summary */}
@@ -4962,6 +4977,10 @@ export default function App() {
                 <input value={addForm.contractNo || ""} onChange={e => updateAddFormField("contractNo", e.target.value)} />
               </div>
               <div className="form-field">
+                <label>Customer PO</label>
+                <input value={addForm.customerPO || ""} onChange={e => updateAddFormField("customerPO", e.target.value)} />
+              </div>
+              <div className="form-field">
                 <label>Equipment Type</label>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 4 }}>
                   {EQUIPMENT_TYPES.map(function(t) {
@@ -5032,6 +5051,15 @@ export default function App() {
               <div className="form-field" style={{ display: "flex", alignItems: "center", gap: 10, paddingTop: 20 }}>
                 <input type="checkbox" id="autoRenewAdd" checked={!!addForm.autoRenew} onChange={e => updateAddFormField("autoRenew", e.target.checked)} style={{ width: "auto" }} />
                 <label htmlFor="autoRenewAdd" style={{ fontSize: 11, color: "#1a2235", textTransform: "none", letterSpacing: 0, cursor: "pointer", marginBottom: 0 }}>Auto Renew</label>
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>Notes</label>
+                <textarea
+                  value={addForm.notes || ""}
+                  onChange={e => updateAddFormField("notes", e.target.value)}
+                  placeholder="Add any notes about this contract..."
+                  style={{ width: "100%", minHeight: 90, resize: "vertical", fontFamily: "inherit", fontSize: 12, padding: 8, border: "1px solid #cbd5e1", borderRadius: 4, boxSizing: "border-box" }}
+                />
               </div>
             </div>
 

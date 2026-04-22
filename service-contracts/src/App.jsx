@@ -738,7 +738,7 @@ function VisitPanel({ contract: c, visits, newVisit, setNewVisit, onAddVisit, on
 
   function startEditVisit(v) {
     setEditingVisitId(v.id);
-    setEditVisitForm({ date: v.date, actualHours: v.actualHours, techs: v.techs, comments: v.comments });
+    setEditVisitForm({ date: v.date, actualHours: v.actualHours, techs: v.techs, comments: v.comments, eqHours: v.eqHours || {} });
   }
 
   function saveEditVisit(contractId, visitId) {
@@ -1077,6 +1077,35 @@ function VisitPanel({ contract: c, visits, newVisit, setNewVisit, onAddVisit, on
                         <label>Comments</label>
                         <input value={editVisitForm.comments} onChange={function(e) { setEditVisitForm(function(f) { return { ...f, comments: e.target.value }; }); }} style={{ width: "100%" }} />
                       </div>
+                      {c.team && c.team.split(", ").filter(Boolean).length > 0 && (
+                        <div className="form-field" style={{ marginBottom: 10 }}>
+                          <label>Equipment Focus</label>
+                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                            {c.team.split(", ").filter(Boolean).map(function(t) {
+                              const active = !!(editVisitForm.eqHours && editVisitForm.eqHours[t]);
+                              return (
+                                <button key={t} type="button"
+                                  onClick={function() {
+                                    setEditVisitForm(function(f) {
+                                      const eq = { ...(f.eqHours || {}) };
+                                      if (eq[t]) { delete eq[t]; } else { eq[t] = true; }
+                                      return { ...f, eqHours: eq };
+                                    });
+                                  }}
+                                  style={{
+                                    padding: "4px 12px", borderRadius: 3, fontSize: 11, fontWeight: 700,
+                                    letterSpacing: "0.05em", cursor: "pointer", transition: "all 0.15s",
+                                    background: active ? (t === "W1" ? "#2563eb" : t === "W3" ? "#d97706" : t === "Log" ? "#059669" : t === "W2" ? "#7c3aed" : "#64748b") : "#f1f5f9",
+                                    color: active ? "#fff" : "#64748b",
+                                    border: active ? "1px solid transparent" : "1px solid #cbd5e1",
+                                  }}>
+                                  {t}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
                         <button className="btn-sm" onClick={cancelEditVisit}>Cancel</button>
                         <button className="btn-primary" style={{ padding: "4px 12px", fontSize: 11 }} onClick={function() { saveEditVisit(c.id, v.id); }}>Save</button>

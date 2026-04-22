@@ -235,6 +235,15 @@ const emptyContract = {
   pendingWorkOrders: [], notes: "", suggestedVisits: "", suggestedDays: "", suggestedHours: "", renewalHistory: [], termStartDate: "", status: "active", ippTasks: [],
 };
 
+function RenewField({ label, children }) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: "#94a3b8", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
+      {children}
+    </div>
+  );
+}
+
 // Format revenue: round to nearest dollar, no decimals
 function fmtRev(n) {
   if (!n || n === 0) return "$0";
@@ -4616,15 +4625,6 @@ export default function App() {
         const renewalCount = (c.renewalHistory || []).length;
         const nextYears = getNextTermYears(renewForm.extensionDate || "");
 
-        const Field = function({ label, children }) {
-          return (
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: "#94a3b8", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
-              {children}
-            </div>
-          );
-        };
-
         const inputStyle = { width: "100%", fontSize: 12, padding: "6px 8px", border: "1px solid #e2e8f0", borderRadius: 4, boxSizing: "border-box" };
         const changed = [];
         if (renewForm.extensionDate !== c.extensionDate) changed.push("Term dates");
@@ -4705,17 +4705,17 @@ export default function App() {
                     NEW TERM
                   </div>
 
-                  <Field label="Term Dates">
+                  <RenewField label="Term Dates">
                     <input style={{ ...inputStyle, color: renewForm.extensionDate !== c.extensionDate ? "#2563eb" : "#1a2235", fontWeight: renewForm.extensionDate !== c.extensionDate ? 700 : 400 }}
                       value={renewForm.extensionDate || ""} onChange={ev => {
                         const val = ev.target.value;
                         const hoursUpdate = allocateHoursByYear(val, renewForm.contractedHours || 0, renewForm.suggestedVisits);
                         setRenewForm(f => ({ ...f, extensionDate: val, ...hoursUpdate }));
                       }} placeholder="M/D/YY-M/D/YY" />
-                  </Field>
+                  </RenewField>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <Field label="Contracted Hours">
+                    <RenewField label="Contracted Hours">
                       <input type="number" ref={renewHoursRef}
                         style={{ ...inputStyle, color: String(renewForm.contractedHours) !== String(c.contractedHours) ? "#2563eb" : "#1a2235", fontWeight: String(renewForm.contractedHours) !== String(c.contractedHours) ? 700 : 400 }}
                         defaultValue={renewForm.contractedHours || ""}
@@ -4724,11 +4724,11 @@ export default function App() {
                           const hoursUpdate = allocateHoursByYear(renewForm.extensionDate, totalHrs, renewForm.suggestedVisits);
                           setRenewForm(f => ({ ...f, contractedHours: totalHrs, ...hoursUpdate }));
                         }} />
-                    </Field>
-                    <Field label="Hourly Rate">
+                    </RenewField>
+                    <RenewField label="Hourly Rate">
                       <input type="number" style={{ ...inputStyle, color: String(renewForm.hourlyRate) !== String(c.hourlyRate) ? "#2563eb" : "#1a2235", fontWeight: String(renewForm.hourlyRate) !== String(c.hourlyRate) ? 700 : 400 }}
                         value={renewForm.hourlyRate || ""} onChange={ev => setRenewForm(f => ({ ...f, hourlyRate: parseFloat(ev.target.value) || 0 }))} />
-                    </Field>
+                    </RenewField>
                   </div>
 
                   {newContractValue > 0 && (
@@ -4752,29 +4752,29 @@ export default function App() {
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <Field label="Suggested Visits">
+                    <RenewField label="Suggested Visits">
                       <input type="number" style={{ ...inputStyle, color: String(renewForm.suggestedVisits) !== String(c.suggestedVisits) ? "#2563eb" : "#1a2235", fontWeight: String(renewForm.suggestedVisits) !== String(c.suggestedVisits) ? 700 : 400 }}
                         value={renewForm.suggestedVisits || ""} onChange={ev => {
                           const nVisits = parseInt(ev.target.value) || 0;
                           const hoursUpdate = allocateHoursByYear(renewForm.extensionDate, parseFloat(renewForm.contractedHours) || 0, nVisits);
                           setRenewForm(f => ({ ...f, suggestedVisits: ev.target.value, ...hoursUpdate }));
                         }} />
-                    </Field>
-                    <Field label="Salesman">
+                    </RenewField>
+                    <RenewField label="Salesman">
                       <input style={inputStyle} value={renewForm.salesman || ""} onChange={ev => setRenewForm(f => ({ ...f, salesman: ev.target.value }))} />
-                    </Field>
-                    <Field label="Parts Discount">
+                    </RenewField>
+                    <RenewField label="Parts Discount">
                       <input style={inputStyle} value={renewForm.partsDiscount || ""} onChange={ev => setRenewForm(f => ({ ...f, partsDiscount: ev.target.value }))} />
-                    </Field>
-                    <Field label="Labor Discount">
+                    </RenewField>
+                    <RenewField label="Labor Discount">
                       <input style={inputStyle} value={renewForm.laborDiscount || ""} onChange={ev => setRenewForm(f => ({ ...f, laborDiscount: ev.target.value }))} />
-                    </Field>
+                    </RenewField>
                   </div>
 
-                  <Field label="Notes">
+                  <RenewField label="Notes">
                     <textarea style={{ ...inputStyle, height: 56, resize: "vertical" }} value={renewForm.notes || ""}
                       onChange={ev => setRenewForm(f => ({ ...f, notes: ev.target.value }))} />
-                  </Field>
+                  </RenewField>
 
                   {changed.length > 0 && (
                     <div style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 4, padding: "8px 12px", marginTop: 4, fontSize: 11 }}>

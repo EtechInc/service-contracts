@@ -97,6 +97,7 @@ SERVICE_RESP=$(curl -sf -X POST \
       \"projectUrl\": \"https://github.com/$GITHUB_ORG/$GITHUB_REPO\",
       \"projectType\": \"github\",
       \"accountLogin\": \"$GITHUB_ORG\",
+      \"autoDeploy\": true,
       \"projectBranch\": \"$BRANCH\"
     },
     \"buildSettings\": {

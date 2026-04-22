@@ -1,10 +1,8 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-ARG GITHUB_PACKAGES_TOKEN
-ENV GITHUB_PACKAGES_TOKEN=$GITHUB_PACKAGES_TOKEN
-
-COPY service-contracts/package.json service-contracts/package-lock.json service-contracts/.npmrc ./
+COPY service-contracts/package.json service-contracts/package-lock.json ./
+COPY service-contracts/vendor ./vendor
 RUN npm ci
 COPY service-contracts/ .
 

@@ -10,6 +10,10 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Allow vendored packages to commit their dist/ folders
+!vendor/
+!vendor/**
 *.local
 
 # Editor directories and files

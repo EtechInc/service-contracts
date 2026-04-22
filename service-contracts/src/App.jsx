@@ -1493,7 +1493,7 @@ export default function App() {
   const [kcanVisits, setKcanVisits] = useState({});
 
   // Per-division monthly snapshots
-  const [knaSnapshots, setKnaSnapshots] = useState({ "2026-01": 7620.75, "2026-02": 7822 });
+  const [knaSnapshots, setKnaSnapshots] = useState({});
   const [kcanSnapshots, setKcanSnapshots] = useState({});
 
   // Per-division work orders
@@ -2482,22 +2482,27 @@ export default function App() {
               {division === "KCAN" ? "If it's measured, it's managed, eh." : "If it's measured, it's managed."}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-            <div style={{ textAlign: "right" }}>
-              <div className="cond" style={{ fontSize: 22, fontWeight: 600, color: "#7c3aed" }}>
-                {[...knaContracts, ...kcanContracts].reduce((s, c) => s + (c.contractedHours || 0), 0).toLocaleString()}
+          {(() => {
+            const allActive = [...knaContracts, ...kcanContracts].filter(c => getContractStatus(c) !== "archived");
+            return (
+            <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+              <div style={{ textAlign: "right" }}>
+                <div className="cond" style={{ fontSize: 22, fontWeight: 600, color: "#7c3aed" }}>
+                  {allActive.reduce((s, c) => s + (c.contractedHours || 0), 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.1em" }}>ANNUAL CONTRACT HRS</div>
+                <div style={{ fontSize: 9, color: "#94a3b8", letterSpacing: "0.05em" }}>KNA + KCAN</div>
               </div>
-              <div style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.1em" }}>ANNUAL CONTRACT HRS</div>
-              <div style={{ fontSize: 9, color: "#94a3b8", letterSpacing: "0.05em" }}>KNA + KCAN</div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div className="cond" style={{ fontSize: 22, fontWeight: 600, color: "#0891b2" }}>
-                ${Math.round([...knaContracts, ...kcanContracts].reduce((s, c) => s + (c.contractAmount || 0), 0)).toLocaleString("en-US")}
+              <div style={{ textAlign: "right" }}>
+                <div className="cond" style={{ fontSize: 22, fontWeight: 600, color: "#0891b2" }}>
+                  ${Math.round(allActive.reduce((s, c) => s + (c.contractAmount || 0), 0)).toLocaleString("en-US")}
+                </div>
+                <div style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.1em" }}>TOTAL REVENUE</div>
+                <div style={{ fontSize: 9, color: "#94a3b8", letterSpacing: "0.05em" }}>KNA + KCAN</div>
               </div>
-              <div style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.1em" }}>TOTAL REVENUE</div>
-              <div style={{ fontSize: 9, color: "#94a3b8", letterSpacing: "0.05em" }}>KNA + KCAN</div>
             </div>
-          </div>
+            );
+          })()}
         </div>
         <div style={{ display: "flex", gap: 4, marginTop: 12 }}>
           {[
@@ -2539,7 +2544,10 @@ export default function App() {
             </div>
 
             {/* KNA vs KCAN Comparison */}
-            {knaContracts.length > 0 && kcanContracts.length > 0 && (
+            {knaContracts.length > 0 && kcanContracts.length > 0 && (() => {
+              const knaActive = knaContracts.filter(c => getContractStatus(c) !== "archived");
+              const kcanActive = kcanContracts.filter(c => getContractStatus(c) !== "archived");
+              return (
               <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 6, padding: "14px 20px", marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
                 <div className="cond" style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", color: "#64748b", marginBottom: 12 }}>KNA vs KCAN COMPARISON</div>
                 <div style={{ display: "grid", gridTemplateColumns: "120px 1fr 1fr", gap: 0 }}>
@@ -2550,11 +2558,11 @@ export default function App() {
                     </div>
                   ))}
                   {[
-                    { label: "Contracts", kna: knaContracts.length, kcan: kcanContracts.length },
-                    { label: "Annual Hrs", kna: knaContracts.reduce((s,c)=>s+(c.contractedHours||0),0).toLocaleString(), kcan: kcanContracts.reduce((s,c)=>s+(c.contractedHours||0),0).toLocaleString() },
-                    { label: "Monthly Rev", kna: "$"+Math.round(knaContracts.reduce((s,c)=>s+getMonthlyRevenue(c),0)).toLocaleString("en-US"), kcan: "$"+Math.round(kcanContracts.reduce((s,c)=>s+getMonthlyRevenue(c),0)).toLocaleString("en-US") },
-                    { label: "Hours Owed", kna: knaContracts.reduce((s,c)=>s+getOwedAfterVisits(c,(knaVisits[c.id]||[]).reduce((sv,v)=>sv+v.actualHours,0)),0).toLocaleString(), kcan: kcanContracts.reduce((s,c)=>s+getOwedAfterVisits(c,(kcanVisits[c.id]||[]).reduce((sv,v)=>sv+v.actualHours,0)),0).toLocaleString() },
-                    { label: "Total Revenue", kna: "$"+Math.round(knaContracts.reduce((s,c)=>s+(c.contractAmount||0),0)).toLocaleString("en-US"), kcan: "$"+Math.round(kcanContracts.reduce((s,c)=>s+(c.contractAmount||0),0)).toLocaleString("en-US") },
+                    { label: "Contracts", kna: knaActive.length, kcan: kcanActive.length },
+                    { label: "Annual Hrs", kna: knaActive.reduce((s,c)=>s+(c.contractedHours||0),0).toLocaleString(), kcan: kcanActive.reduce((s,c)=>s+(c.contractedHours||0),0).toLocaleString() },
+                    { label: "Monthly Rev", kna: "$"+Math.round(knaActive.reduce((s,c)=>s+getMonthlyRevenue(c),0)).toLocaleString("en-US"), kcan: "$"+Math.round(kcanActive.reduce((s,c)=>s+getMonthlyRevenue(c),0)).toLocaleString("en-US") },
+                    { label: "Hours Owed", kna: knaActive.reduce((s,c)=>s+getOwedAfterVisits(c,(knaVisits[c.id]||[]).reduce((sv,v)=>sv+v.actualHours,0)),0).toLocaleString(), kcan: kcanActive.reduce((s,c)=>s+getOwedAfterVisits(c,(kcanVisits[c.id]||[]).reduce((sv,v)=>sv+v.actualHours,0)),0).toLocaleString() },
+                    { label: "Total Revenue", kna: "$"+Math.round(knaActive.reduce((s,c)=>s+(c.contractAmount||0),0)).toLocaleString("en-US"), kcan: "$"+Math.round(kcanActive.reduce((s,c)=>s+(c.contractAmount||0),0)).toLocaleString("en-US") },
                   ].map(function(row) {
                     return [
                       <div key={row.label+"l"} style={{ fontSize: 11, color: "#94a3b8", letterSpacing: "0.06em", textTransform: "uppercase", display: "flex", alignItems: "center", paddingBottom: 6 }}>{row.label}</div>,
@@ -2565,7 +2573,8 @@ export default function App() {
                 </div>
                 <div style={{ fontSize: 9, color: "#cbd5e1", marginTop: 6 }}>Click a value to switch to that division.</div>
               </div>
-            )}
+              );
+            })()}
 
             {/* Team breakdown */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>

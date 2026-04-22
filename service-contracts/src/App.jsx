@@ -28,6 +28,8 @@ function mapDbToContract(c) {
     extensionDate: c.extension_date || '',
     termStartDate: c.term_start_date || '',
     suggestedVisits: parseInt(c.suggested_visits) || 4,
+    suggestedDays: c.suggested_days != null ? c.suggested_days : '',
+    suggestedHours: c.suggested_hours != null ? c.suggested_hours : '',
     partsDiscount: c.parts_discount || '',
     laborDiscount: c.labor_discount || '',
     premiumBilling: c.premium_billing || '',
@@ -64,6 +66,8 @@ function mapContractToDb(c) {
     extension_date: c.extensionDate || '',
     term_start_date: c.termStartDate || '',
     suggested_visits: parseInt(c.suggestedVisits) || 4,
+    suggested_days: c.suggestedDays === '' || c.suggestedDays == null ? null : parseInt(c.suggestedDays),
+    suggested_hours: c.suggestedHours === '' || c.suggestedHours == null ? null : parseInt(c.suggestedHours),
     parts_discount: c.partsDiscount || '',
     labor_discount: c.laborDiscount || '',
     premium_billing: c.premiumBilling || '',
@@ -228,7 +232,7 @@ const emptyContract = {
   hours2024: 0, hours2025: 0, hours2026: 0, hours2027: 0, hours2028: 0,
   extensionDate: "",
   partsDiscount: "", laborDiscount: "", premiumBilling: "", salesman: "", autoRenew: false,
-  pendingWorkOrders: [], notes: "", suggestedVisits: "", renewalHistory: [], termStartDate: "", status: "active", ippTasks: [],
+  pendingWorkOrders: [], notes: "", suggestedVisits: "", suggestedDays: "", suggestedHours: "", renewalHistory: [], termStartDate: "", status: "active", ippTasks: [],
 };
 
 // Format revenue: round to nearest dollar, no decimals
@@ -866,8 +870,21 @@ function VisitPanel({ contract: c, visits, newVisit, setNewVisit, onAddVisit, on
                   </div>
                 </div>
                 <div className="form-field">
-                  <label>Suggested Visits</label>
-                  <input type="number" min="0" value={contractForm.suggestedVisits || ""} placeholder="e.g. 4" onChange={e => setContractForm(f => ({ ...f, suggestedVisits: e.target.value }))} style={{ width: "100%" }} />
+                  <label>Suggested</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <input type="number" min="0" max="99" maxLength={2} value={contractForm.suggestedVisits || ""} placeholder="4" onChange={e => setContractForm(f => ({ ...f, suggestedVisits: e.target.value.slice(0, 2) }))} style={{ width: 56, textAlign: "center" }} />
+                      <span style={{ fontSize: 9, color: "#94a3b8", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" }}>Visits</span>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <input type="number" min="0" max="99" maxLength={2} value={contractForm.suggestedDays || ""} placeholder="1" onChange={e => setContractForm(f => ({ ...f, suggestedDays: e.target.value.slice(0, 2) }))} style={{ width: 56, textAlign: "center" }} />
+                      <span style={{ fontSize: 9, color: "#94a3b8", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" }}>Days</span>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <input type="number" min="0" max="99" maxLength={2} value={contractForm.suggestedHours || ""} placeholder="8" onChange={e => setContractForm(f => ({ ...f, suggestedHours: e.target.value.slice(0, 2) }))} style={{ width: 56, textAlign: "center" }} />
+                      <span style={{ fontSize: 9, color: "#94a3b8", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" }}>Hours</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="form-field">
                   <label>Travel Costs</label>
@@ -5000,8 +5017,21 @@ export default function App() {
                 </div>
               </div>
               <div className="form-field">
-                <label>Suggested Visits</label>
-                <input type="number" min="0" value={addForm.suggestedVisits || ""} placeholder="e.g. 4" onChange={e => updateAddFormField("suggestedVisits", e.target.value)} />
+                <label>Suggested</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <input type="number" min="0" max="99" maxLength={2} value={addForm.suggestedVisits || ""} placeholder="4" onChange={e => updateAddFormField("suggestedVisits", e.target.value.slice(0, 2))} style={{ width: 56, textAlign: "center" }} />
+                    <span style={{ fontSize: 9, color: "#94a3b8", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" }}>Visits</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <input type="number" min="0" max="99" maxLength={2} value={addForm.suggestedDays || ""} placeholder="1" onChange={e => updateAddFormField("suggestedDays", e.target.value.slice(0, 2))} style={{ width: 56, textAlign: "center" }} />
+                    <span style={{ fontSize: 9, color: "#94a3b8", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" }}>Days</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <input type="number" min="0" max="99" maxLength={2} value={addForm.suggestedHours || ""} placeholder="8" onChange={e => updateAddFormField("suggestedHours", e.target.value.slice(0, 2))} style={{ width: 56, textAlign: "center" }} />
+                    <span style={{ fontSize: 9, color: "#94a3b8", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" }}>Hours</span>
+                  </div>
+                </div>
               </div>
               <div className="form-field">
                 <label>Corporate Group</label>

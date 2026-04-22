@@ -824,7 +824,7 @@ function VisitPanel({ contract: c, visits, newVisit, setNewVisit, onAddVisit, on
 
           {/* Editable contract fields */}
           {editingContract && contractForm ? (
-            <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 6, padding: "14px", marginBottom: 12 }}>
+            <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 6, padding: "14px", marginBottom: 12, maxHeight: "calc(100vh - 280px)", overflowY: "auto" }}>
               <div style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>Contract Details</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
                 <div className="form-field" style={{ gridColumn: "span 2" }}>

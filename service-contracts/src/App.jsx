@@ -970,7 +970,9 @@ function VisitPanel({ contract: c, visits, newVisit, setNewVisit, onAddVisit, on
                 { label: "Contract Amt", val: c.contractAmount > 0 ? fmtRev(c.contractAmount) : "-" },
                 { label: "Monthly Rev", val: getMonthlyRevenue(c) > 0 ? fmtRev(getMonthlyRevenue(c)) : "-" },
                 { label: "Hourly Rate", val: c.hourlyRate > 0 ? "$" + c.hourlyRate + "/hr" : "-" },
-                { label: "Suggested Visits", val: c.suggestedVisits || "-" },
+                { label: "Sugg. Visits", val: c.suggestedVisits || "-" },
+                { label: "Sugg. Days", val: c.suggestedDays !== "" && c.suggestedDays != null ? c.suggestedDays : "-" },
+                { label: "Sugg. Hours", val: c.suggestedHours !== "" && c.suggestedHours != null ? c.suggestedHours : "-" },
                 { label: "Travel", val: c.travelCosts || "-" },
                 { label: "Group", val: c.corporateGroup && c.corporateGroup !== "None" ? c.corporateGroup : "-" },
                 { label: "Ext. Date", val: c.extensionDate || "-" },
@@ -1671,9 +1673,13 @@ export default function App() {
   const [renewalContract, setRenewalContract] = useState(null);
   const [renewForm, setRenewForm] = useState({});
   const renewHoursRef = useRef(null);
+  const renewRateRef = useRef(null);
   useEffect(function() {
     if (renewHoursRef.current) {
       renewHoursRef.current.value = String(renewForm.contractedHours || "");
+    }
+    if (renewRateRef.current) {
+      renewRateRef.current.value = String(renewForm.hourlyRate || "");
     }
   }, [renewalContract]);
 
@@ -4726,8 +4732,10 @@ export default function App() {
                         }} />
                     </RenewField>
                     <RenewField label="Hourly Rate">
-                      <input type="number" style={{ ...inputStyle, color: String(renewForm.hourlyRate) !== String(c.hourlyRate) ? "#2563eb" : "#1a2235", fontWeight: String(renewForm.hourlyRate) !== String(c.hourlyRate) ? 700 : 400 }}
-                        value={renewForm.hourlyRate || ""} onChange={ev => setRenewForm(f => ({ ...f, hourlyRate: parseFloat(ev.target.value) || 0 }))} />
+                      <input type="number" ref={renewRateRef}
+                        style={{ ...inputStyle, color: String(renewForm.hourlyRate) !== String(c.hourlyRate) ? "#2563eb" : "#1a2235", fontWeight: String(renewForm.hourlyRate) !== String(c.hourlyRate) ? 700 : 400 }}
+                        defaultValue={renewForm.hourlyRate || ""}
+                        onBlur={ev => setRenewForm(f => ({ ...f, hourlyRate: parseFloat(ev.target.value) || 0 }))} />
                     </RenewField>
                   </div>
 

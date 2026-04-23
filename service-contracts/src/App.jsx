@@ -4697,7 +4697,13 @@ export default function App() {
                     </div>
                   ))}
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: "#94a3b8", textTransform: "uppercase", marginBottom: 3 }}>Hours by Year</div>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: "#94a3b8", textTransform: "uppercase", marginBottom: 3, display: "flex", alignItems: "center", gap: 4 }}>
+                      Hours by Year
+                      <span
+                        title={"Hours are allocated from Contracted Hours across the years the contract term spans.\n\nIf Suggested Visits is set: each year's share is proportional to the number of visits that fall in it (visits are spread evenly across the term).\n\nOtherwise: each year's share is proportional to the number of months the term covers in that year.\n\nRounding remainders go to the years with the largest fractional parts so the total matches Contracted Hours exactly."}
+                        style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 12, height: 12, borderRadius: "50%", border: "1px solid #94a3b8", color: "#94a3b8", fontSize: 9, fontWeight: 700, fontFamily: "serif", fontStyle: "italic", cursor: "help", textTransform: "none", letterSpacing: 0, lineHeight: 1 }}
+                      >i</span>
+                    </div>
                     {YEARS.filter(y => (c["hours" + y] || 0) > 0).map(y => (
                       <div key={y} style={{ fontSize: 12, color: "#1a2235" }}>{y}: {c["hours" + y]} hrs</div>
                     ))}
